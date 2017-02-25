@@ -1,0 +1,13 @@
+services:
+  br_ips.industry_manager:
+    class: Drupal\br_ips\IndustryManager
+    arguments: ["@entity.query", "@entity_type.manager", "@current_route_match", "@request_stack", "@language_manager"]
+  br_ips.solution_category_manager:
+    class: Drupal\br_ips\SolutionCategoryManager
+    arguments: ["@entity.query", "@entity_type.manager", "@current_route_match", "@language_manager"]
+  br_ips.solution_manager:
+    class: Drupal\br_ips\SolutionManager
+    arguments: ["@entity.query", "@entity_type.manager", "@current_route_match", "@language_manager"]
+  br_ips.platform_category_manager:
+    class: Drupal\br_ips\PlatformCategoryManager
+    arguments: ["@entity.query", "@entity_type.manager", "@language_manager"]

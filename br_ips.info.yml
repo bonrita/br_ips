@@ -1,0 +1,7 @@
+name: Br Industry Platforms and Solutions
+type: module
+description: Helpers for Br Industry Plaforms and Solutions
+core: 8.x
+package: Br
+dependencies:
+  - country

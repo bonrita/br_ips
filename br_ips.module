@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for Chep IPS module.
+ */
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function br_ips_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+
+  // Set the industry cookie if an industry page is shown.
+  // NOTE: This is doubled in the frontend, because with varnish/cdn this code
+  // will not be reached.
+  // @todo Set a data attribute on page(?) level with the required cookie data.
+  if ($entity->bundle() == 'industry' && $view_mode == 'full') {
+    $field_name = \Drupal\br_ips\IndustryManagerInterface::TERM_INDUSTRY_FIELD;
+    $domain_id = $entity->{$field_name}->target_id;
+    \Drupal::service('br_ips.industry_manager')->setPreferredIndustry($domain_id);
+  }
+}

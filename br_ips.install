@@ -1,0 +1,61 @@
+<?php
+
+
+
+/**
+ * Remove redundant Page and Case study content.
+ */
+function br_ips_update_8001() {
+
+  $nids = \Drupal::entityQuery('node')
+    ->condition('type', ['page', 'case_study'], 'IN')
+    ->execute();
+
+  $controller = \Drupal::entityTypeManager()->getStorage('node');
+  $entities = $controller->loadMultiple($nids);
+  $controller->delete($entities);
+}
+
+/**
+ * Remove leftover and detached data directly from the database.
+ */
+function br_ips_update_8002() {
+
+  // Remove leftover paragraph records.
+
+  \Drupal::database()->delete('paragraphs_item_field_data')
+    ->condition('type', ['a01_image_headline', 'a02_intro_text', 'c08_related_content', 'c09_contact'], 'IN')
+    ->execute();
+
+  \Drupal::database()->delete('paragraphs_item')
+    ->condition('type', ['a01_image_headline', 'a02_intro_text', 'c08_related_content', 'c09_contact'], 'IN')
+    ->execute();
+
+  // Remove leftover file records.
+
+  // Below code taken from file_cron(). Modified to delete files from the
+  // database instead of throwing an error.
+  $age = \Drupal::config('system.file')->get('temporary_maximum_age');
+  $file_storage = \Drupal::entityTypeManager()->getStorage('file');
+
+  if ($age) {
+    $fids = Drupal::entityQuery('file')
+      ->condition('status', FILE_STATUS_PERMANENT, '<>')
+      ->condition('changed', REQUEST_TIME - $age, '<')
+      ->range(0, 100)
+      ->execute();
+    $files = $file_storage->loadMultiple($fids);
+    foreach ($files as $file) {
+      $references = \Drupal::service('file.usage')->listUsage($file);
+      if (empty($references)) {
+        if (!file_exists($file->getFileUri())) {
+          // Delete from the database if the "physical" file is not found.
+          \Drupal::database()->delete('file_managed')
+            ->condition('uri', $file->getFileUri())
+            ->execute();
+        }
+      }
+    }
+  }
+
+}
